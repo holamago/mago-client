@@ -95,5 +95,5 @@ async def audio_client(uri):
 
 if __name__ == '__main__':
     # Server URI (modify as needed)
-    uri = "ws://10.7.105.242:8001"
+    uri = "ws://tiro.mago52.com:9001"
     asyncio.run(audio_client(uri))
