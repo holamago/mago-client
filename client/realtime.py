@@ -44,7 +44,7 @@ async def audio_client(uri):
         try:
             while True:
                 # Read a chunk of audio from the microphone
-                audio_data = stream.read(CHUNK_SIZE)
+                audio_data = stream.read(CHUNK_SIZE, exception_on_overflow=False)
 
                 #================================================================================================
                 # CAUTION: macOS specific fix
@@ -68,15 +68,17 @@ async def audio_client(uri):
                 except json.JSONDecodeError:
                     result = response
 
-                # print("Server response:", result)
-
                 # If there is a "text" field in the result, append it to transcribed_text.
                 if isinstance(result, dict):
                     if "text" in result:
                         transcribed_text = result["text"]
-                        # Clear the line and update with new transcribed_text.
-                        sys.stdout.write("\r" + transcribed_text + "\033[K")
-                        sys.stdout.flush()
+                        if transcribed_text:
+                            # Print the transcribed text in real-time.
+                            # Use "\r" to overwrite the current line in the terminal.
+                            # "\033[K" clears the line after the cursor.
+                            sys.stdout.write("\r" + transcribed_text + "\033[K")
+                            sys.stdout.flush()
+
                     if "status" in result and result["status"] == 3 and transcribed_text:
                         # When status==3, print the final text on a new line and reset.
                         sys.stdout.write("\r" + transcribed_text + "\033[K")
@@ -95,5 +97,13 @@ async def audio_client(uri):
 
 if __name__ == '__main__':
     # Server URI (modify as needed)
-    uri = "ws://tiro.mago52.com:9001"
-    asyncio.run(audio_client(uri))
+    uri = "ws://tiro.mago52.com:9009"
+
+    try
+        asyncio.run(audio_client(uri))
+    except KeyboardInterrupt:
+        print("\nClient stopped by user.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        print("Exiting client.")
