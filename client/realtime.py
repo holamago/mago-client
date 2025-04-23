@@ -10,6 +10,7 @@ import websockets
 import json
 import pyaudio
 import numpy as np
+import uuid
 
 # Audio configuration
 CHUNK_DURATION = 0.1  # seconds
@@ -38,8 +39,7 @@ async def audio_client(uri):
 
     async with websockets.connect(uri) as websocket:
         # Send the initial mode to the server to setup the VAD model
-        await websocket.send("online")
-        print("Connected to server, starting audio streaming...")
+        session_header = uuid.uuid4().bytes
 
         try:
             while True:
@@ -58,8 +58,10 @@ async def audio_client(uri):
 
                 #================================================================================================
 
+                chunk_data = session_header + scaled_audio_data
+
                 # Send the audio chunk to the server
-                await websocket.send(scaled_audio_data)
+                await websocket.send(chunk_data)
 
                 # Receive EPD result from the server
                 response = await websocket.recv()
@@ -97,9 +99,9 @@ async def audio_client(uri):
 
 if __name__ == '__main__':
     # Server URI (modify as needed)
-    uri = "ws://tiro.mago52.com:9009"
+    uri = "ws://tiro.mago52.com:9001"
 
-    try
+    try:
         asyncio.run(audio_client(uri))
     except KeyboardInterrupt:
         print("\nClient stopped by user.")
