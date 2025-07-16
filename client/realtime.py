@@ -99,7 +99,7 @@ async def audio_client(uri):
 
 if __name__ == '__main__':
     # Server URI (modify as needed)
-    uri = "ws://tiro.mago52.com:9001"
+    uri = "wss://api.magovoice.com/epd/"
 
     try:
         asyncio.run(audio_client(uri))
